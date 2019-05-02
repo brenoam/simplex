@@ -18,6 +18,7 @@ class Simplex():
 		logger.info(Ab)
 		
 		lp = LinearProgramming(rows, columns, c, Ab)
+		lp.solve()
 
 if (__name__ == '__main__'):
 		simplex = Simplex()
