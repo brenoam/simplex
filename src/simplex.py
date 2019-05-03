@@ -5,7 +5,7 @@ from linearProgramming import LinearProgramming
 class Simplex():
 		
 	def run(self):
-		logging.basicConfig(level=logging.INFO, format='%(asctime)s-%(levelname)s\n%(message)s')
+		logging.basicConfig(level=logging.INFO, format='%(message)s', filename='log', filemode='w')
 		logger = logging.getLogger(__name__)
 		
 		rows, columns = map(int,input().strip().split(" "))
@@ -18,7 +18,7 @@ class Simplex():
 		logger.info(Ab)
 		
 		lp = LinearProgramming(rows, columns, c, Ab)
-		lp.solve()
+		lp.run()
 
 if (__name__ == '__main__'):
 		simplex = Simplex()
