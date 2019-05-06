@@ -4,7 +4,7 @@ from pprint import pformat
 import pprint
 
 OP_DECIMAL_PLACES = 10
-PRINT_DECIMAL_PLACES = 7
+ZERO = 1/10**6
 
 class LinearProgramming():
 	def __init__(self, rows, columns, c, Ab, auxiliary=False):
@@ -50,24 +50,7 @@ class LinearProgramming():
 		logging.info("Basis")
 		logging.info(pformat(self.__basis, width = 250))
 		logging.info("LP created")
-	
-	def run(self):
-		message = self.solve()
-		if(message['status'] == "Feasible"):
-			print("otima")
-			print(message["optimal_value"])
-			print(message["solution"])
-			print(message["certificate"])
-			
-		elif(message['status'] == "Unbounded"):
-			print("ilimitada")
-			print(message["solution"])
-			print(message["certificate"])
-			
-		elif(message['status'] == "Infeasible"):
-			print("inviavel")
-			print(message["certificate"])
-	
+
 	def solve(self):
 		# Auxiliary LP
 		neg_entries = self.__get_b_negative_entries_index()
@@ -76,6 +59,7 @@ class LinearProgramming():
 			message = self.__solve_aux_lp()
 			if(message['status'] == "Infeasible"):
 				return message
+			logging.info("Feasible Aux LP")
 		
 		try:
 			while(True):
@@ -165,6 +149,7 @@ class LinearProgramming():
 			multiplier = -self.__tableau[index][column]
 			line_multiplier = list(map(lambda x: x*multiplier, self.__tableau[row]))
 			self.__tableau[index] = list(map(lambda x,y: round(x+y,OP_DECIMAL_PLACES), self.__tableau[index], line_multiplier))
+			self.__tableau[index] = list(map(lambda x: 0 if (abs(x) < ZERO) else x, self.__tableau[index]))
 		
 		logging.info("Tableau")
 		logging.info(pformat(self.__tableau, width=250))
@@ -196,9 +181,11 @@ class LinearProgramming():
 		for i in range(1,self.__rows+1):
 			if (self.__tableau[i][col] > 0):
 				temp = self.__tableau[i][-1]/self.__tableau[i][col]
+				logging.info(temp)
 				if(temp < value):
 					value = temp
 					index = i
+		logging.info("Chosen:")
 		logging.info(index)
 		logging.info(value)
 		if(index == -1):
@@ -223,10 +210,10 @@ class LinearProgramming():
 	def __get_unbounded_certificate(self, col):
 		solution = [0]*self.__columns
 		if(self.__is_variable_from_original_problem(col)):
-			solution[col] = 1
+			solution[col-self.__op_matrix_len] = 1
 		for index, base in enumerate(self.__basis):
 			if(self.__is_variable_from_original_problem(base)):
-				solution[index] = -self.__tableau[index+1][col]
+				solution[col-self.__op_matrix_len] = -self.__tableau[index+1][col]
 		return solution
 		
 	def __is_variable_from_original_problem(self, basis):

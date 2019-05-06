@@ -18,7 +18,26 @@ class Simplex():
 		logger.info(Ab)
 		
 		lp = LinearProgramming(rows, columns, c, Ab)
-		lp.run()
+		message = lp.solve()
+		if(message['status'] == "Feasible"):
+			print("otima")
+			print("%.8f"%message["optimal_value"])
+			for i in message["solution"]: print("%.8f "%i, end="")
+			print()
+			for i in message["certificate"]: print("%.8f "%i, end="")
+			print()
+			
+		elif(message['status'] == "Unbounded"):
+			print("ilimitada")
+			for i in message["solution"]: print("%.8f "%i, end="")
+			print()
+			for i in message["certificate"]: print("%.8f "%i, end="")
+			print()
+			
+		elif(message['status'] == "Infeasible"):
+			print("inviavel")
+			for i in message["certificate"]: print("%.8f "%i, end="")
+			print()
 
 if (__name__ == '__main__'):
 		simplex = Simplex()
