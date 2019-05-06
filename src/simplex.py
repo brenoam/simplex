@@ -9,8 +9,8 @@ class Simplex():
 		logger = logging.getLogger(__name__)
 		
 		rows, columns = map(int,input().strip().split(" "))
-		c = list(map(int, input().split()))
-		Ab = [list(map(int, input().split())) for row in range(rows)]
+		c = list(map(float, input().split()))
+		Ab = [list(map(float, input().split())) for row in range(rows)]
 		
 		logger.info("%i rows", rows)
 		logger.info("%i columns", columns)

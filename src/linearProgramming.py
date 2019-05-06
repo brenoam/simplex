@@ -4,7 +4,7 @@ from pprint import pformat
 import pprint
 
 OP_DECIMAL_PLACES = 10
-ZERO = 1/10**6
+ZERO = 1/10**7
 
 class LinearProgramming():
 	def __init__(self, rows, columns, c, Ab, auxiliary=False):
@@ -74,7 +74,8 @@ class LinearProgramming():
 				"optimal_value":self.__get_optimal_value(),
 				"solution": self.__get_feasible_solution(),
 				"certificate": self.__get_optimal_certificate(),
-				"basis": self.__get_basis()
+				"basis": self.__get_basis(),
+				"tableau": self.__tableau
 			}
 		except utils.Unbounded as e:
 			col = e.args[0]
@@ -94,10 +95,41 @@ class LinearProgramming():
 		
 		if(message['status'] == "Feasible"):
 			if(message['optimal_value'] == 0):
+				newTableau = self.__tableau.copy()
+				
+				# for i in message["tableau"]:
+				# 	print(["%.2f" % v for v in i])
+				# print()
+				# print(message["basis"])
+				
+				# for i in self.__tableau:
+				# 	print(["%.2f" % v for v in i])
+				# print()
+				for i in range(len(message["tableau"])):
+					newTableau[i] = message["tableau"][i][:-self.__op_matrix_len-1] + [message["tableau"][i][-1]]
+				newTableau[0][self.__op_matrix_len:-1] = self.__tableau[0][self.__op_matrix_len:-1]
+				newTableau[0][-1] = 0
+				
+				self.__tableau = newTableau
+				
+				# for i in self.__tableau:
+				# 	print(["%.2f" % v for v in i])
+				# print()
+				
 				aux_basis = message['basis']
 				for index, base in enumerate(aux_basis):
-					if(self.__is_variable_from_original_problem(base)):
+					if(self.__is_variable_from_aug_original_problem(base)):
+						# self.__do_pivoting(index+1, base)
+						self.__basis[index] = base
+						
+				for index, base in enumerate(self.__basis):
+					if(self.__is_variable_from_aug_original_problem(base)):
 						self.__do_pivoting(index+1, base)
+				
+				# for i in self.__tableau:
+				# 	print(["%.2f" % v for v in i])
+				# print()
+				
 			elif (message['optimal_value'] < 0):
 				message = {
 					"status": "Infeasible",
@@ -152,7 +184,7 @@ class LinearProgramming():
 			self.__tableau[index] = list(map(lambda x: 0 if (abs(x) < ZERO) else x, self.__tableau[index]))
 		
 		logging.info("Tableau")
-		logging.info(pformat(self.__tableau, width=250))
+		logging.info(pformat(self.__tableau))
 		logging.info("Basis")
 		logging.info(pformat(self.__basis, width = 250))
 	
@@ -218,6 +250,9 @@ class LinearProgramming():
 		
 	def __is_variable_from_original_problem(self, basis):
 		return(basis >= self.__op_matrix_len and basis < self.__op_matrix_len+self.__columns)
+	
+	def __is_variable_from_aug_original_problem(self, basis):
+		return(basis >= self.__op_matrix_len and basis < self.__op_matrix_len*2+self.__columns)
 		
 	def __get_basis(self):
 		return self.__basis
