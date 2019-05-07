@@ -1,22 +1,21 @@
 #!/usr/bin/python3
-import logging
+# import logging
 from linearProgramming import LinearProgramming
 
 class Simplex():
-		
+
 	def run(self):
-		logging.basicConfig(level=logging.INFO, format='%(message)s', filename='log', filemode='w')
-		logger = logging.getLogger(__name__)
-		
+		# loggingging.basicConfig(level=# loggingging.INFO, format='%(message)s', filename='# logging', filemode='w')
+
 		rows, columns = map(int,input().strip().split(" "))
 		c = list(map(float, input().split()))
 		Ab = [list(map(float, input().split())) for row in range(rows)]
-		
-		logger.info("%i rows", rows)
-		logger.info("%i columns", columns)
-		logger.info(c)
-		logger.info(Ab)
-		
+
+		# loggingging.info("%i rows", rows)
+		# loggingging.info("%i columns", columns)
+		# loggingging.info(c)
+		# loggingging.info(Ab)
+
 		lp = LinearProgramming(rows, columns, c, Ab)
 		message = lp.solve()
 		if(message['status'] == "Feasible"):
@@ -26,14 +25,14 @@ class Simplex():
 			print()
 			for i in message["certificate"]: print("%.8f "%i, end="")
 			print()
-			
+
 		elif(message['status'] == "Unbounded"):
 			print("ilimitada")
 			for i in message["solution"]: print("%.8f "%i, end="")
 			print()
 			for i in message["certificate"]: print("%.8f "%i, end="")
 			print()
-			
+
 		elif(message['status'] == "Infeasible"):
 			print("inviavel")
 			for i in message["certificate"]: print("%.8f "%i, end="")
